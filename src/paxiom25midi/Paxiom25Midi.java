@@ -1,5 +1,8 @@
 package paxiom25midi;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.sound.midi.MidiMessage;
 
 import processing.core.PApplet;
@@ -12,8 +15,7 @@ public class Paxiom25Midi implements PConstants, StandardMidiListener {
 	PApplet parent;
 	MidiBus myBus;
 
-	int[] idsCirculares = { 72, 8, 74, 71, 20, 22, 86, 73 };
-	ControladorCircular[] circulares = new ControladorCircular[idsCirculares.length];
+	Axiom25 axiom25;
 
 	ControladorTecla[] teclas = new ControladorTecla[15];
 	int[] idTeclas = { 42, 43, 45, 47, 49, 50, 52, 54, 55, 57 };
@@ -23,10 +25,12 @@ public class Paxiom25Midi implements PConstants, StandardMidiListener {
 
 	int[] idsTaps = { 50, 45, 51, 49, 36, 38, 46, 42 };
 	ControladorTecla[] taps = new ControladorTecla[8];
+	
 	PFont fontA;
 
 	public Paxiom25Midi(PApplet parent) {
 		super();
+		axiom25=new Axiom25(parent);
 		this.parent = parent;
 
 		fontA = parent.createFont("Arial", 15, true);
@@ -34,21 +38,7 @@ public class Paxiom25Midi implements PConstants, StandardMidiListener {
 		parent.size(800, 600);
 		parent.background(0);
 
-		int _y = 100;
-		int _x = 30;
-		int margen = 10;
-		int contadorFila = 0;
-		int margenInicialX = 90;
-		for (int i = 0; i < 8; i++) {
-
-			if (i == 4) {
-				_y = 200;
-				contadorFila = 0;
-			}
-			int posicionX = (_x * (contadorFila + 1) + margen * contadorFila);
-			circulares[i] = new ControladorCircular(posicionX + margenInicialX, _y, idsCirculares[i]);
-			contadorFila++;
-		}
+		
 
 		int contadorIdsTaps = 0;
 		int posiX = 500;
@@ -63,7 +53,7 @@ public class Paxiom25Midi implements PConstants, StandardMidiListener {
 				posiY = 100 + ancho + ancho / 5;
 				posiX = 500;
 			}
-			taps[p] = new ControladorTecla(posiX, posiY, false, idTap, parent.color(150), ancho, ancho);
+			taps[p] = new ControladorTecla(parent, posiX, posiY, false, idTap, parent.color(150), ancho, ancho);
 			posiX += ancho + ancho / 5;
 		}
 
@@ -79,7 +69,7 @@ public class Paxiom25Midi implements PConstants, StandardMidiListener {
 				idTecla = idTeclas[contadorIdsTecla];
 				contadorIdsTecla++;
 			}
-			teclas[t] = new ControladorTecla(posicionX, 300, disabled, idTecla, parent.color(200), 200, 40);
+			teclas[t] = new ControladorTecla(parent, posicionX, 300, disabled, idTecla, parent.color(200), 200, 40);
 		}
 
 		int contadorIdsTeclasNegras = 0;
@@ -97,7 +87,7 @@ public class Paxiom25Midi implements PConstants, StandardMidiListener {
 			}
 			if (r == 2 || r == 5 || r == 7)
 				posicionX += 50;
-			teclasNegras[r] = new ControladorTecla(posicionX + 35, 300, disabled, idTeclaNegra, parent.color(0), 150, 20);
+			teclasNegras[r] = new ControladorTecla(parent, posicionX + 35, 300, disabled, idTeclaNegra, parent.color(0), 150, 20);
 			posicionX += 50;
 		}
 
@@ -116,8 +106,8 @@ public class Paxiom25Midi implements PConstants, StandardMidiListener {
 		parent.fill(0);
 		parent.rect(0, 0, parent.width, parent.height);
 
-		for (int i = 0; i < circulares.length; i++) {
-			circulares[i].display();
+		for (int i = 0; i < axiom25.circulares.size(); i++) {
+			axiom25.circulares.get(i).display();
 		}
 
 		for (int t = 0; t < teclas.length; t++) {
@@ -218,12 +208,8 @@ public class Paxiom25Midi implements PConstants, StandardMidiListener {
 	}
 
 	void actualizaControladorCircular(int idControlador, int valorControlador) {
-		for (int i = 0; i < circulares.length; i++) {
-			if (circulares[i].idControlador == idControlador) {
-				circulares[i].actualiza(valorControlador);
-			}
-
-		}
+		axiom25.actualizaControladorCircular(idControlador,  valorControlador);
+		
 
 	}
 
@@ -237,98 +223,9 @@ public class Paxiom25Midi implements PConstants, StandardMidiListener {
 		// shut down a thread used by this library.
 	}
 
-	class ControladorTecla {
-		int x;
-		int y;
-		int col;
-		int ancho;
-		int alto;
-		boolean valor = false;
-		boolean disabled = false;
-		public int idTecla;
-		int col_ref;
+	
 
-		public ControladorTecla(int _x, int _y, boolean _disabled, int _idTecla, int _color, int _altura, int _anchura) {
-			x = _x;
-			idTecla = _idTecla;
-			y = _y;
-			col = _color;
-			col_ref = _color;
-			ancho = _anchura;
-			alto = _altura;
-			disabled = _disabled;
-		}
-
-		void display() {
-			parent.pushStyle();
-
-			parent.textAlign(CENTER);
-			if (!disabled) {
-				parent.stroke(200);
-
-				parent.fill(col);
-
-				// text(""+valor, x+ancho/2, y+alto+20);
-				parent.fill(col);
-
-			} else {
-				parent.stroke(30);
-				parent.fill(30);
-			}
-
-			parent.rect(x, y, ancho, alto);
-			parent.popStyle();
-		}
-
-		void actualiza(boolean valorNuevo) {
-			valor = valorNuevo;
-			if (valor)
-				col = parent.color(255, 0, 0);
-			else
-				col = col_ref;
-		}
-
-	}
-
-	class ControladorCircular {
-		int x;
-		int y;
-		int col;
-		int diametro;
-		int valor = 0;
-		public int idControlador;
-
-		public ControladorCircular(int _x, int _y, int _idControlador) {
-			x = _x;
-			y = _y;
-			col = parent.color(100);
-			diametro = 30;
-			idControlador = _idControlador;
-		}
-
-		void display() {
-			parent.pushStyle();
-
-			parent.textAlign(CENTER);
-			parent.fill(255);
-			parent.text(valor, x, y + diametro + 3);
-			if (valor > 0) {
-				parent.stroke(150);
-				parent.fill(parent.map(valor, 0, 127, 50, 256), 0, 0);
-			} else {
-				parent.stroke(30);
-				parent.fill(20);
-			}
-			parent.ellipse(x, y, diametro, diametro);
-			parent.popStyle();
-		}
-
-		void actualiza(int valorNuevo) {
-			valor = valorNuevo;
-		}
-
-	}
-
+	
 	@Override
 	public void midiMessage(MidiMessage message, long timeStamp) {
 		rawMidi(message.getMessage());
