@@ -1,7 +1,6 @@
 package paxiom25midi;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.lang.reflect.Method;
 
 import javax.sound.midi.MidiMessage;
 
@@ -12,25 +11,30 @@ import themidibus.MidiBus;
 import themidibus.StandardMidiListener;
 
 public class Paxiom25Midi implements PConstants, StandardMidiListener {
+	boolean debug ;
+
 	PApplet parent;
 	MidiBus myBus;
 
 	Axiom25 axiom25;
 
-	ControladorTecla[] teclas = new ControladorTecla[15];
-	int[] idTeclas = { 42, 43, 45, 47, 49, 50, 52, 54, 55, 57 };
-
-	int[] idTeclasNegras = { 44, 46, 48, 51, 53, 56, 58 };
-	ControladorTecla[] teclasNegras = new ControladorTecla[10];
-
-	int[] idsTaps = { 50, 45, 51, 49, 36, 38, 46, 42 };
-	ControladorTecla[] taps = new ControladorTecla[8];
-	
 	PFont fontA;
+	Method tapPressMethod;
+	Method teclaBlancaPressMethod;
+	Method teclaBlancaReleasedMethod;
+
+	Method teclaNegraPressMethod;
+	Method teclaNegraReleasedMethod;
+
+	Method tapReleasedMethod;
+
+	Method circularMoveMethod;
+	Method neumaticoSueltoMoveMethod;
+	Method neumaticoOrigenMoveMethod;
 
 	public Paxiom25Midi(PApplet parent) {
 		super();
-		axiom25=new Axiom25(parent);
+		axiom25 = new Axiom25(parent);
 		this.parent = parent;
 
 		fontA = parent.createFont("Arial", 15, true);
@@ -38,63 +42,48 @@ public class Paxiom25Midi implements PConstants, StandardMidiListener {
 		parent.size(800, 600);
 		parent.background(0);
 
-		
-
-		int contadorIdsTaps = 0;
-		int posiX = 500;
-		int posiY = 100;
-		for (int p = 0; p < taps.length; p++) {
-
-			int idTap = idsTaps[contadorIdsTaps];
-			contadorIdsTaps++;
-			int ancho = 50;
-
-			if (p == 4) {
-				posiY = 100 + ancho + ancho / 5;
-				posiX = 500;
-			}
-			taps[p] = new ControladorTecla(parent, posiX, posiY, false, idTap, parent.color(150), ancho, ancho);
-			posiX += ancho + ancho / 5;
-		}
-
-		int contadorIdsTecla = 0;
-		for (int t = 0; t < teclas.length; t++) {
-			int posicionX = 50 * t;
-			boolean disabled;
-			int idTecla = 0;
-			if (t < 2 || t > 11) {
-				disabled = true;
-			} else {
-				disabled = false;
-				idTecla = idTeclas[contadorIdsTecla];
-				contadorIdsTecla++;
-			}
-			teclas[t] = new ControladorTecla(parent, posicionX, 300, disabled, idTecla, parent.color(200), 200, 40);
-		}
-
-		int contadorIdsTeclasNegras = 0;
-		int posicionX = 0;
-		for (int r = 0; r < teclasNegras.length; r++) {
-
-			boolean disabled;
-			int idTeclaNegra = 0;
-			if (r < 2 || r > 8) {
-				disabled = true;
-			} else {
-				disabled = false;
-				idTeclaNegra = idTeclasNegras[contadorIdsTeclasNegras];
-				contadorIdsTeclasNegras++;
-			}
-			if (r == 2 || r == 5 || r == 7)
-				posicionX += 50;
-			teclasNegras[r] = new ControladorTecla(parent, posicionX + 35, 300, disabled, idTeclaNegra, parent.color(0), 150, 20);
-			posicionX += 50;
-		}
-
 		myBus = new MidiBus(null, 0, 0); // Create a new MidiBus object
 		myBus.addMidiListener(this);
 		parent.smooth();
 		parent.registerDispose(this);
+
+		try {
+			tapPressMethod = parent.getClass().getMethod("tapPress", Integer.class);
+			tapReleasedMethod = parent.getClass().getMethod("tapReleased", Integer.class);
+
+			teclaBlancaPressMethod = parent.getClass().getMethod("teclaBlancaPress", Integer.class);
+			teclaBlancaReleasedMethod = parent.getClass().getMethod("teclaBlancaReleased", Integer.class);
+
+			teclaNegraPressMethod = parent.getClass().getMethod("teclaNegraPress", Integer.class);
+			teclaNegraReleasedMethod = parent.getClass().getMethod("teclaNegraReleased", Integer.class);
+			circularMoveMethod = parent.getClass().getMethod("circularMove", Integer.class, Integer.class);
+			neumaticoSueltoMoveMethod = parent.getClass().getMethod("neumaticoSueltoMove", Integer.class);
+			neumaticoOrigenMoveMethod = parent.getClass().getMethod("neumaticoSueltoMove", Integer.class);
+		} catch (Exception e) {
+			e.printStackTrace();
+
+		}
+	}
+
+	public void makeEvent(Method method, int posicion, int valor) {
+		makeEvent(method, new Object[] { posicion, valor });
+
+	}
+
+	public void makeEvent(Method method, int posicion) {
+		makeEvent(method, new Object[] { posicion });
+	}
+
+	public void makeEvent(Method method, Object[] parametros) {
+		if (method != null) {
+			try {
+				method.invoke(parent, parametros);
+			} catch (Exception e) {
+				System.err.println("Disabling " + tapPressMethod.getName() + " for tap because of an error.");
+				e.printStackTrace();
+				method = null;
+			}
+		}
 	}
 
 	public void dibuja() {
@@ -107,19 +96,19 @@ public class Paxiom25Midi implements PConstants, StandardMidiListener {
 		parent.rect(0, 0, parent.width, parent.height);
 
 		for (int i = 0; i < axiom25.circulares.size(); i++) {
-			axiom25.circulares.get(i).display();
+			axiom25.circulares.get(i).display(parent.g);
 		}
 
-		for (int t = 0; t < teclas.length; t++) {
-			teclas[t].display();
+		for (int t = 0; t < axiom25.teclas.size(); t++) {
+			axiom25.teclas.get(t).display();
 		}
 
-		for (int r = 0; r < teclasNegras.length; r++) {
-			teclasNegras[r].display();
+		for (int r = 0; r < axiom25.teclasNegras.size(); r++) {
+			axiom25.teclasNegras.get(r).display();
 		}
 
-		for (int p = 0; p < taps.length; p++) {
-			taps[p].display();
+		for (int p = 0; p < axiom25.taps.size(); p++) {
+			axiom25.taps.get(p).display();
 		}
 
 	}
@@ -128,18 +117,24 @@ public class Paxiom25Midi implements PConstants, StandardMidiListener {
 	final int tipoControladorNotaPresionada = 144;
 	final int tipoControladorNotaSoltada = 128;
 	final int tipoControladorTap = 153;
+	final int tipoControladorNeumaticoConOrigen = 224;
+	// es el mismo que el circular pero con id controlador=1
+	final int tipoControladorNeumaticoSuelto = 176;
 
-	public void rawMidi(byte[] data) { // You can also use rawMidi(byte[] data, String
-								// bus_name)
+	public void rawMidi(byte[] data) { // You can also use rawMidi(byte[] data,
+										// String
+		// bus_name)
 		// Receive some raw data
 
 		// data[0] will be the status byte
 		// data[1] and data[2] will contain the parameter of the message (e.g.
 		// pitch and volume for noteOn noteOff)
-		parent.println();
-		parent.println("Raw Midi Data:");
-		parent.println("--------");
-		parent.println("Status Byte/MIDI Command:" + (int) (data[0] & 0xFF));
+		if (debug) {
+			parent.println();
+			parent.println("Raw Midi Data:");
+			parent.println("--------");
+			parent.println("Status Byte/MIDI Command:" + (int) (data[0] & 0xFF));
+		}
 		// N.B. In some cases (noteOn, noteOff, controllerChange, etc) the first
 		// half of the status byte is the command and the second half i
 
@@ -148,14 +143,18 @@ public class Paxiom25Midi implements PConstants, StandardMidiListener {
 
 		int tipoControlador = dameValorMidi(data[0]);
 		int idControlador = dameValorMidi(data[1]);
+		int valorControlador = dameValorMidi(data[2]);
+
 		switch (tipoControlador) {
 
 		case tipoControladorCircular:
 
-			int valorControlador = dameValorMidi(data[2]);
-
-			actualizaControladorCircular(idControlador, valorControlador);
-
+			if (idControlador != 1){
+				actualizaControladorCircular(idControlador, valorControlador);
+			}else{
+				axiom25.actualizaControladorneumaticoSuelto(valorControlador);
+			makeEvent(neumaticoSueltoMoveMethod,  valorControlador);
+			}
 			break;
 		case tipoControladorNotaPresionada:
 			actualizaControladorTecla(idControlador, true);
@@ -164,53 +163,63 @@ public class Paxiom25Midi implements PConstants, StandardMidiListener {
 			actualizaControladorTecla(idControlador, false);
 			break;
 		case tipoControladorTap:
-			valorControlador = dameValorMidi(data[2]);
 			actualizaControladorTap(idControlador, valorControlador);
 			break;
+		case tipoControladorNeumaticoConOrigen:
+			axiom25.actualizaControladorneumaticoOrigen(valorControlador);
+			makeEvent(neumaticoOrigenMoveMethod,  valorControlador);
+			break;
 		}
-
-		for (int i = 1; i < data.length; i++) {
-			parent.println("Param " + (i + 1) + ": " + dameValorMidi(data[i]));
-		}
+		if (debug)
+			for (int i = 1; i < data.length; i++) {
+				parent.println("Param " + (i + 1) + ": " + dameValorMidi(data[i]));
+			}
 	}
 
 	void actualizaControladorTecla(int idControlador, boolean pulsada) {
-		for (int i = 0; i < teclas.length; i++) {
-			if (teclas[i].idTecla == idControlador) {
-				teclas[i].actualiza(pulsada);
-				return;
+		try {
+			int pos = axiom25.actualizaTeclaBlanca(idControlador, pulsada);
+			if (pulsada)
+				makeEvent(teclaBlancaPressMethod, pos);
+			else
+				makeEvent(teclaBlancaReleasedMethod, pos);
 
-			}
-
+			return;
+		} catch (ControladorTeclaNoExiste e) {
+			// e.printStackTrace();
 		}
-		for (int i = 0; i < teclasNegras.length; i++) {
-			if (teclasNegras[i].idTecla == idControlador) {
-				teclasNegras[i].actualiza(pulsada);
-				return;
-
-			}
-
+		try {
+			int pos = axiom25.actualizaTeclaNegra(idControlador, pulsada);
+			if (pulsada)
+				makeEvent(teclaNegraPressMethod, pos);
+			else
+				makeEvent(teclaNegraReleasedMethod, pos);
+			return;
+		} catch (ControladorTeclaNoExiste e) {
+			// e.printStackTrace();
 		}
 
 	}
 
 	void actualizaControladorTap(int idControlador, int valorControlador) {
-		for (int i = 0; i < taps.length; i++) {
+		int pos;
+		try {
+			pos = axiom25.actualizaControladorTap(idControlador, valorControlador);
+			if (valorControlador > 0)
+				makeEvent(tapPressMethod, pos);
+			else
+				makeEvent(tapReleasedMethod, pos);
 
-			if (taps[i].idTecla == idControlador) {
-				boolean valor = false;
-				if (valorControlador > 0)
-					valor = true;
-				taps[i].actualiza(valor);
-			}
+		} catch (ControladorTeclaNoExiste e) {
+			// TODO Auto-generated catch block
+			throw new RuntimeException("no deberia ocurrir!");
 		}
 
 	}
 
 	void actualizaControladorCircular(int idControlador, int valorControlador) {
-		axiom25.actualizaControladorCircular(idControlador,  valorControlador);
-		
-
+		int pos = axiom25.actualizaControladorCircular(idControlador, valorControlador);
+		makeEvent(circularMoveMethod, pos, valorControlador);
 	}
 
 	int dameValorMidi(byte b) {
@@ -223,13 +232,9 @@ public class Paxiom25Midi implements PConstants, StandardMidiListener {
 		// shut down a thread used by this library.
 	}
 
-	
-
-	
-	@Override
 	public void midiMessage(MidiMessage message, long timeStamp) {
 		rawMidi(message.getMessage());
-		
+
 	}
 
 }

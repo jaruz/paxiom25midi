@@ -1,6 +1,7 @@
 package paxiom25midi;
 
 import processing.core.PApplet;
+import processing.core.PGraphics;
 
 public class ControladorCircular {
 	int x;
@@ -10,21 +11,26 @@ public class ControladorCircular {
 	int valor = 0;
 	public int idControlador;
 	private  PApplet parent;
+	 int posicion;
 
-	public ControladorCircular(PApplet parent, int _x, int _y, int _idControlador) {
+	public ControladorCircular(PApplet parent, int _x, int _y, int _idControlador, int posicion) {
 		this.parent = parent;
 		x = _x;
 		y = _y;
 		col = parent.color(100);
 		diametro = 30;
 		idControlador = _idControlador;
+		this.posicion=posicion;
 	}
-
+/**
+ * sirve para realizar comparaciones en colecciones
+ * @param idControlador2
+ */
 	public ControladorCircular(int idControlador2) {
 		idControlador = idControlador2;
 	}
 
-	void display() {
+	void display(PGraphics parent) {
 		parent.pushStyle();
 
 		parent.textAlign(parent.CENTER);
@@ -32,7 +38,7 @@ public class ControladorCircular {
 		parent.text(valor, x, y + diametro + 3);
 		if (valor > 0) {
 			parent.stroke(150);
-			parent.fill(parent.map(valor, 0, 127, 50, 256), 0, 0);
+			parent.fill(PApplet.map(valor, 0, 127, 50, 256), 0, 0);
 		} else {
 			parent.stroke(30);
 			parent.fill(20);

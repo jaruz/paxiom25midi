@@ -12,9 +12,10 @@ public class ControladorTecla {
 	boolean disabled = false;
 	public int idTecla;
 	int col_ref;
-	private final PApplet parent;
+	 PApplet parent;
+	 int posicion;
 
-	public ControladorTecla(PApplet parent, int _x, int _y, boolean _disabled, int _idTecla, int _color, int _altura, int _anchura) {
+	public ControladorTecla(PApplet parent, int _x, int _y, boolean _disabled, int _idTecla, int _color, int _altura, int _anchura, int posicion) {
 		this.parent = parent;
 		x = _x;
 		idTecla = _idTecla;
@@ -24,6 +25,15 @@ public class ControladorTecla {
 		ancho = _anchura;
 		alto = _altura;
 		disabled = _disabled;
+		this.posicion=posicion;
+	}
+
+	/**
+	 * sirve para comparar y encontrar elementos en colecciones
+	 * @param idControlador
+	 */
+	public ControladorTecla(int idControlador) {
+		idTecla = idControlador;
 	}
 
 	void display() {
@@ -55,4 +65,28 @@ public class ControladorTecla {
 			col = col_ref;
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + idTecla;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ControladorTecla other = (ControladorTecla) obj;
+		if (idTecla != other.idTecla)
+			return false;
+		return true;
+	}
+
+	
+	
 }
