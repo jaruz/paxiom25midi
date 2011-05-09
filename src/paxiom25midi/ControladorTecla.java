@@ -87,6 +87,13 @@ public class ControladorTecla {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "ControladorTecla [idTecla=" + idTecla + ", posicion=" + posicion + "]";
+	}
+	
+	
+
 	
 	
 }

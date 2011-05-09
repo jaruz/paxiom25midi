@@ -11,7 +11,12 @@ import themidibus.MidiBus;
 import themidibus.StandardMidiListener;
 
 public class Paxiom25Midi implements PConstants, StandardMidiListener {
-	boolean debug ;
+	int limiteMidi=127;
+	
+	int ultimoValorNeumaticoSuelto;
+	
+	boolean debug;
+	boolean info;
 
 	PApplet parent;
 	MidiBus myBus;
@@ -60,18 +65,23 @@ public class Paxiom25Midi implements PConstants, StandardMidiListener {
 			neumaticoSueltoMoveMethod = parent.getClass().getMethod("neumaticoSueltoMove", Integer.class);
 			neumaticoOrigenMoveMethod = parent.getClass().getMethod("neumaticoSueltoMove", Integer.class);
 		} catch (Exception e) {
-			e.printStackTrace();
-
+			// e.printStackTrace();
+			parent.println("tapPress tapReleased teclaBlancaPress teclaBlancaReleased teclaNegraPress teclaNegraReleased circularMove neumaticoSueltoMove neumaticoSueltoMove");
 		}
 	}
 
 	public void makeEvent(Method method, int posicion, int valor) {
 		makeEvent(method, new Object[] { posicion, valor });
+		if (info)
+			parent.println(method.getName() + " posicion: " + posicion + " valor: " + valor);
 
 	}
 
 	public void makeEvent(Method method, int posicion) {
 		makeEvent(method, new Object[] { posicion });
+		if (info)
+			parent.println(method.getName() + " posicion: " + posicion);
+
 	}
 
 	public void makeEvent(Method method, Object[] parametros) {
@@ -79,7 +89,7 @@ public class Paxiom25Midi implements PConstants, StandardMidiListener {
 			try {
 				method.invoke(parent, parametros);
 			} catch (Exception e) {
-				System.err.println("Disabling " + tapPressMethod.getName() + " for tap because of an error.");
+				System.err.println("Disabling " + method.getName() + " for tap because of an error.");
 				e.printStackTrace();
 				method = null;
 			}
@@ -135,6 +145,10 @@ public class Paxiom25Midi implements PConstants, StandardMidiListener {
 			parent.println("--------");
 			parent.println("Status Byte/MIDI Command:" + (int) (data[0] & 0xFF));
 		}
+		if (debug)
+			for (int i = 1; i < data.length; i++) {
+				parent.println("Param " + (i + 1) + ": " + dameValorMidi(data[i]));
+			}
 		// N.B. In some cases (noteOn, noteOff, controllerChange, etc) the first
 		// half of the status byte is the command and the second half i
 
@@ -149,11 +163,12 @@ public class Paxiom25Midi implements PConstants, StandardMidiListener {
 
 		case tipoControladorCircular:
 
-			if (idControlador != 1){
+			if (idControlador != 1) {
 				actualizaControladorCircular(idControlador, valorControlador);
-			}else{
+			} else {
 				axiom25.actualizaControladorneumaticoSuelto(valorControlador);
-			makeEvent(neumaticoSueltoMoveMethod,  valorControlador);
+				ultimoValorNeumaticoSuelto=valorControlador;
+				makeEvent(neumaticoSueltoMoveMethod, valorControlador);
 			}
 			break;
 		case tipoControladorNotaPresionada:
@@ -167,13 +182,10 @@ public class Paxiom25Midi implements PConstants, StandardMidiListener {
 			break;
 		case tipoControladorNeumaticoConOrigen:
 			axiom25.actualizaControladorneumaticoOrigen(valorControlador);
-			makeEvent(neumaticoOrigenMoveMethod,  valorControlador);
+			makeEvent(neumaticoOrigenMoveMethod, valorControlador);
 			break;
 		}
-		if (debug)
-			for (int i = 1; i < data.length; i++) {
-				parent.println("Param " + (i + 1) + ": " + dameValorMidi(data[i]));
-			}
+		
 	}
 
 	void actualizaControladorTecla(int idControlador, boolean pulsada) {
@@ -233,8 +245,49 @@ public class Paxiom25Midi implements PConstants, StandardMidiListener {
 	}
 
 	public void midiMessage(MidiMessage message, long timeStamp) {
+		try{
 		rawMidi(message.getMessage());
+		}catch (Exception e) {
+			System.out.println("error de lectura midi");
+		}
 
 	}
+
+	public int valorCircular(int pos, int limiteEscala) {
+		int valorCircular = valorCircular(pos);
+		return (int) parent.map(valorCircular, 0, 127, 0, limiteEscala);
+	}
+
+	public int valorCircular(int pos) {
+		return axiom25.valorCircular(pos);
+	}
+
+	public int valorNeumaticoSuelto(int limiteEscala) {
+		return valorNeumaticoSuelto(0, limiteEscala);
+
+	}
+
+	public int valorNeumaticoSuelto(int limiteEscalaMin, int limiteEscalaMax) {
+		int valorNeumaticoSuelto = valorNeumaticoSuelto();
+		return (int) parent.map(valorNeumaticoSuelto, 0, 127, limiteEscalaMin, limiteEscalaMax);
+
+	}
+
+	public int valorNeumaticoSuelto() {
+		return axiom25.valorNeumaticoSuelto();
+	}
+
+	public int valorNeumaticoOrigen() {
+		return axiom25.valorNeumaticoOrigen();
+	}
+	public void info(){
+		axiom25.info();
+	}
+
+	public boolean valorTap(int pos) {
+		// TODO Auto-generated method stub
+		return axiom25.valorTap(pos);
+	}
+	
 
 }

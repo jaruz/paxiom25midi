@@ -13,15 +13,28 @@ public class Axiom25 {
 	List<ControladorTecla> taps = new ArrayList<ControladorTecla>();
 
 	List<ControladorTecla> teclas = new ArrayList<ControladorTecla>();
-	int[] idTeclas = { 42, 43, 45, 47, 49, 50, 52, 54, 55, 57 };
+	int[] idTeclas = { 54, 55, 57, 59, 61, 62, 64, 66, 67, 69 };
 
-	int[] idTeclasNegras = { 44, 46, 48, 51, 53, 56, 58 };
+	int[] idTeclasNegras = { 56, 58, 60, 63, 65, 68, 70 };
 	List<ControladorTecla> teclasNegras = new ArrayList<ControladorTecla>();
 	
 	ControladorCircular neumaticoSuelto;
 	ControladorCircular neumaticoOrigen;
+	private final PApplet parent;
 
+	public void info() {
+		parent.println("circulares");
+
+		for(ControladorCircular circ:circulares){
+			parent.println(circ);
+		}
+		parent.println("neumaticoSuelto:"+neumaticoSuelto);
+		parent.println("neumaticoOrigen:"+neumaticoOrigen);
+
+	}
+	
 	public Axiom25(PApplet parent) {
+		this.parent = parent;
 		iniciaCirculares(parent);
 
 		inicializaTaps(parent);
@@ -34,6 +47,17 @@ public class Axiom25 {
 		neumaticoOrigen=new ControladorCircular(parent, 0,0,300,0);
 	}
 
+	public int valorCircular(int pos){
+		return circulares.get(pos-1).valor;
+	}
+	public int valorNeumaticoSuelto(){
+		return neumaticoSuelto.valor;
+	}
+	public int valorNeumaticoOrigen(){
+		return neumaticoOrigen.valor;
+	}
+	
+	
 	public void actualizaControladorneumaticoSuelto( int valorControlador) {
 		neumaticoSuelto.actualiza(valorControlador);
 
@@ -169,5 +193,12 @@ public class Axiom25 {
 			throw new ControladorTeclaNoExiste();
 		}
 	}
+
+	public boolean valorTap(int pos) {
+		// TODO Auto-generated method stub
+		return taps.get(pos-1).valor;
+	}
+
+	
 
 }

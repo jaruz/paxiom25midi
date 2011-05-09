@@ -4,6 +4,11 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 
 public class ControladorCircular {
+	@Override
+	public String toString() {
+		return "Circular [posicion=" + posicion + ", valor=" + valor + "]";
+	}
+
 	int x;
 	int y;
 	int col;
