@@ -2,7 +2,7 @@ package paxiom25midi;
 
 import processing.core.PApplet;
 
-public class EjemploPAppletUtilizaPaxiom25 extends PApplet {
+public class EjemploPAppletUtilizaPaxiom25 extends PApplet implements Paxiom{
 
 	Paxiom25Midi paxiom25midi;
 
@@ -10,13 +10,13 @@ public class EjemploPAppletUtilizaPaxiom25 extends PApplet {
 
 	public void setup() {
 
-		paxiom25midi = new Paxiom25Midi(this);
+		paxiom25midi = new Paxiom25Midi(this, true);
 
 		// paxiom25midi.dibuja();
 		paxiom25midi.debug = true;
 		paxiom25midi.info = true;
 		paxiom25midi.info();
-	 colorMode(HSB, limite, limite, limite, limite);
+		colorMode(HSB, limite, limite, limite, limite);
 		noStroke();
 
 	}
@@ -27,7 +27,7 @@ public class EjemploPAppletUtilizaPaxiom25 extends PApplet {
 	
 	
 	public void draw() {
-	//	 paxiom25midi.draw();
+	 paxiom25midi.draw();
 //		if (paxiom25midi.valorTap(7)) {
 //			angle += 0.05;
 //			translate(width / 2, height / 2);

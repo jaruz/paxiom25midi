@@ -10,12 +10,14 @@ public class GsVideoMidiMinimal  extends PApplet implements Paxiom{
 
 	public void setup() {
 	//  size(640, 480, P3D);
-		paxiom25midi = new Paxiom25Midi(this);
+		paxiom25midi = new Paxiom25Midi(this, false);
 
 	  background(0);
 	  // Load and play the video in a loop
 	  myMovie = new GSMovie(this, "carrera.MOV");
 	  myMovie.loop();
+		paxiom25midi.info = true;
+
 	}
 
 
@@ -33,7 +35,8 @@ public class GsVideoMidiMinimal  extends PApplet implements Paxiom{
 		  if (1 < myMovie.width && 1 < myMovie.height) {
 		  
 		    // A new time position is calculated using the current mouse location:
-		    float f = constrain((float)paxiom25midi.valorCircular(1) / paxiom25midi.limiteMidi, 0, 1);
+//			    float f = constrain((float)paxiom25midi.valorCircular(1) / paxiom25midi.limiteMidi, 0, 1);
+			    float f = constrain((float)mouseX / width, 0, 1);
 		    float t = myMovie.duration() * f;
 		    
 		    // If the new time is different enough from the current position,

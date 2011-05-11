@@ -15,7 +15,7 @@ public class GsVideoMidi  extends PApplet implements Paxiom{
 //		println(dataPath());
 //		println(savePath());
 	//  size(640, 480, P3D);
-		paxiom25midi = new Paxiom25Midi(this);
+		paxiom25midi = new Paxiom25Midi(this, false);
 		paxiom25midi.info=true;
 	  background(0);
 	  // Load and play the video in a loop

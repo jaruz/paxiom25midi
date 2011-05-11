@@ -37,37 +37,60 @@ public class Paxiom25Midi implements PConstants, StandardMidiListener {
 	Method neumaticoSueltoMoveMethod;
 	Method neumaticoOrigenMoveMethod;
 
-	public Paxiom25Midi(PApplet parent) {
+	public Paxiom25Midi(PApplet parent, boolean debug) {
 		super();
 		axiom25 = new Axiom25(parent);
 		this.parent = parent;
-
+		this.debug=debug;
+		if(debug){
 		fontA = parent.createFont("Arial", 15, true);
+		
+		
 		parent.textFont(fontA, 15);
 		parent.size(800, 600);
 		parent.background(0);
-
+		}
 		myBus = new MidiBus(null, 0, 0); // Create a new MidiBus object
 		myBus.addMidiListener(this);
-		parent.smooth();
+		
 		parent.registerDispose(this);
 
+		tapPressMethod=enchufaMetodo(parent,  "tapPress");
+		tapReleasedMethod=enchufaMetodo(parent,  "tapReleased");
+
+		teclaBlancaPressMethod=enchufaMetodo(parent,  "teclaBlancaPress");
+		teclaBlancaReleasedMethod=enchufaMetodo(parent,  "teclaBlancaReleased");
+
+
+		teclaNegraPressMethod=enchufaMetodo(parent,  "teclaNegraPress");
+		teclaNegraReleasedMethod=enchufaMetodo(parent,  "teclaNegraReleased");
+
+		circularMoveMethod=enchufaMetodoBis(parent,  "circularMove");
+
+		neumaticoSueltoMoveMethod=enchufaMetodo(parent,  "neumaticoSueltoMove");
+		neumaticoOrigenMoveMethod=enchufaMetodo(parent,  "neumaticoOrigenMove");
+
+
+	}
+	
+
+	private Method enchufaMetodoBis(PApplet parent, String string) {
 		try {
-			tapPressMethod = parent.getClass().getMethod("tapPress", Integer.class);
-			tapReleasedMethod = parent.getClass().getMethod("tapReleased", Integer.class);
-
-			teclaBlancaPressMethod = parent.getClass().getMethod("teclaBlancaPress", Integer.class);
-			teclaBlancaReleasedMethod = parent.getClass().getMethod("teclaBlancaReleased", Integer.class);
-
-			teclaNegraPressMethod = parent.getClass().getMethod("teclaNegraPress", Integer.class);
-			teclaNegraReleasedMethod = parent.getClass().getMethod("teclaNegraReleased", Integer.class);
-			circularMoveMethod = parent.getClass().getMethod("circularMove", Integer.class, Integer.class);
-			neumaticoSueltoMoveMethod = parent.getClass().getMethod("neumaticoSueltoMove", Integer.class);
-			neumaticoOrigenMoveMethod = parent.getClass().getMethod("neumaticoSueltoMove", Integer.class);
+			return parent.getClass().getMethod(string, Integer.class, Integer.class);
 		} catch (Exception e) {
-			// e.printStackTrace();
-			parent.println("tapPress tapReleased teclaBlancaPress teclaBlancaReleased teclaNegraPress teclaNegraReleased circularMove neumaticoSueltoMove neumaticoSueltoMove");
+			System.out.println("metodo no existe  void "+string+"(Integer pos, Integer pos2)");
 		}
+		return null;
+	}
+
+	
+	private Method enchufaMetodo(PApplet parent, String string) {
+		try {
+			return  parent.getClass().getMethod(string, Integer.class);
+		} catch (Exception e) {
+			System.out.println("metodo no existe  void "+string+"(Integer pos)");
+		}
+		return null;
 	}
 
 	public void makeEvent(Method method, int posicion, int valor) {
@@ -248,7 +271,8 @@ public class Paxiom25Midi implements PConstants, StandardMidiListener {
 		try{
 		rawMidi(message.getMessage());
 		}catch (Exception e) {
-			System.out.println("error de lectura midi");
+			System.out.println("error de lectura midi"+message.toString());
+			//throw new RuntimeException(e);
 		}
 
 	}

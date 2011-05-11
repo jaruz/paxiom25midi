@@ -4,7 +4,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="lib/core.jar"/>
 	<classpathentry kind="lib" path="lib/themidibus.jar" sourcepath="/home/juanitu/Documentos/workspacep5/libs/themidibus/src"/>
-	<classpathentry kind="lib" path="lib/gsvideo.jar"/>
+	<classpathentry kind="lib" path="lib/gsvideo.jar" sourcepath="/home/juanitu/Documentos/workspacep5/libs/gsvideo"/>
 	<classpathentry kind="lib" path="lib/jna-3.2.5.jar"/>
 	<classpathentry kind="lib" path="lib/gstreamer-java-bin-1.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
