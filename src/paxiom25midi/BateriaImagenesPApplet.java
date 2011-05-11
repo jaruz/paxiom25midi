@@ -13,9 +13,8 @@ import codeanticode.gsvideo.GSMovie;
 public class BateriaImagenesPApplet extends PApplet implements Paxiom{
 
 	String[] prefijosImagenes = { "aznar", "benedicto", "botin", "bush", "camps", "caracol", "chocolate", "fabra", "franco", "rato", "zapatero" };
-	String[] prefijosPeli = { "carrera.MOV", "columpio1.MOV" };
-	List  pelis = new ArrayList();
-
+	String[] prefijosPelis = { "carrera.MOV", "columpio1.MOV", "station.MOV"};
+	List pelis=new ArrayList();
 	Paxiom25Midi paxiom25midi;
 	boolean debug = true;
 	PFont fontA;
@@ -34,8 +33,16 @@ public class BateriaImagenesPApplet extends PApplet implements Paxiom{
 
 	
 	private void setupSecuenciasVideo() {
-		for(String prefijoPeli:prefijosPeli)
-			pelis.add( new GSMovie(this, prefijoPeli));
+		for(String prefijoPeli:prefijosPelis) {
+			GSMovie gsMovie = new GSMovie(this, prefijoPeli);
+			gsMovie.loop();
+			gsMovie.play();
+			gsMovie.volume(0);
+			gsMovie.jump(5);
+			gsMovie.pause();
+			pelis.add(gsMovie);
+	
+		}
 		// TODO Auto-generated method stub
 		
 	}
@@ -62,35 +69,51 @@ public class BateriaImagenesPApplet extends PApplet implements Paxiom{
 
 	}
 	public void drawVideo() {
-		  if (1 < myMovie.width && 1 < myMovie.height) {
 		  
-		    // A new time position is calculated using the current mouse location:
-//			    float f = constrain((float)paxiom25midi.valorCircular(1) / paxiom25midi.limiteMidi, 0, 1);
-			    float f = constrain((float)mouseX / width, 0, 1);
-//			    println(f);
-		    float t = myMovie.duration() * f;
-		    
-		    // If the new time is different enough from the current position,
-		    // then we jump to the new position. But how different? Here the
-		    // difference has been set to 0.1 (1 tenth of a second), but it can
-		    // be smaller. My guess is that the smallest value should correspond
-		    // to the duration of a single frame (for instance 1/24 if the frame rate 
-		    // of the video file is 24fps). Setting even smaller values seem to lead
-		    // to choppiness. This will become trickier once the GSMovie.speed()  
-		    // and GSMovie.frameRate() methods become functional. 
-		    if (0.1 < abs(t - myMovie.time())) {
-		      // The movie stream must be in play mode in order to jump to another
-		      // position along the stream. Otherwise it won't work.
-		      myMovie.play();
-		      myMovie.jump(t);
-		      myMovie.pause();
-		    }
-			 // tint(255, 230);
-
-			    //image(myMovie, 0, 0, width, height);
-			    image(myMovie, 0, 0);
-		  }
+//		    sincronizaVideoConMouse();
+		    sincronizaVideoEnPlay();
 		}
+
+
+	private void sincronizaVideoEnPlay() {
+		  if (1 < myMovie.width && 1 < myMovie.height) {
+
+		myMovie.play();
+		fill(255,30);
+		if(myMovie!=null)
+		image(myMovie, 0, 0, width, height);
+		  }
+	}
+
+
+	private void sincronizaVideoConMouse() {
+		  if (1 < myMovie.width && 1 < myMovie.height) {
+
+		// A new time position is calculated using the current mouse location:
+//			    float f = constrain((float)paxiom25midi.valorCircular(1) / paxiom25midi.limiteMidi, 0, 1);
+		    float f = constrain((float)mouseX / width, 0, 1);
+//			    println(f);
+		float t = myMovie.duration() * f;
+		
+		// If the new time is different enough from the current position,
+		// then we jump to the new position. But how different? Here the
+		// difference has been set to 0.1 (1 tenth of a second), but it can
+		// be smaller. My guess is that the smallest value should correspond
+		// to the duration of a single frame (for instance 1/24 if the frame rate 
+		// of the video file is 24fps). Setting even smaller values seem to lead
+		// to choppiness. This will become trickier once the GSMovie.speed()  
+		// and GSMovie.frameRate() methods become functional. 
+		if (0.1 < abs(t - myMovie.time())) {
+		  // The movie stream must be in play mode in order to jump to another
+		  // position along the stream. Otherwise it won't work.
+		  myMovie.play();
+		  myMovie.jump(t);
+		  myMovie.pause();
+		}
+		  tint(255, 230);
+		    image(myMovie, 0, 0, width, height);
+		  }
+	}
 
 	private void drawSecuencias() {
 		fill(255);
@@ -122,7 +145,7 @@ public class BateriaImagenesPApplet extends PApplet implements Paxiom{
 	}
 
 	public void movieEvent(GSMovie myMovie) {
-		fill(255);
+//		fill(255);
 //		text("evento de movie!" + myMovie.time(), 730, 30);
 //
 //		// println();
@@ -160,17 +183,25 @@ public class BateriaImagenesPApplet extends PApplet implements Paxiom{
 			iniciaVideo(0);
 		}else  if(pos.intValue()==5){
 			iniciaVideo(1);
+		}else  if(pos.intValue()==6){
+			iniciaVideo(2);
 		}
-
 		System.out.println(pos);
 
 	}
 
 	private void iniciaVideo(int posicion) {
 		
-		if(myMovie!=null)myMovie.noLoop();
-		myMovie = (GSMovie) pelis.get(posicion);
-		myMovie.loop();
+		
+//		myMovie =  new GSMovie(this, prefijosPeli[posicion]);
+//		myMovie.volume(0);
+//		myMovie.jump(5);
+		
+		myMovie=(GSMovie) pelis.get(posicion);
+		myMovie.play();
+	
+
+	
 		fotoVideo=false;
 
 	}
@@ -179,7 +210,9 @@ public class BateriaImagenesPApplet extends PApplet implements Paxiom{
 
 
 	private void finalizaVideo() {
-		if(myMovie!=null)myMovie.noLoop();
+//		if(myMovie!=null)myMovie.noLoop();
+		myMovie.stop();
+//		myMovie=null;
 		fotoVideo=true;
 	}
 	public void tapPress(Integer pos) {

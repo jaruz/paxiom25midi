@@ -23,11 +23,8 @@ public class EjemploPAppletUtilizaPaxiom25 extends PApplet implements Paxiom{
 
 	float angle = 0;
 	
-
-	
-	
 	public void draw() {
-	 paxiom25midi.draw();
+	// paxiom25midi.draw();
 //		if (paxiom25midi.valorTap(7)) {
 //			angle += 0.05;
 //			translate(width / 2, height / 2);
