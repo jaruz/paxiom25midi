@@ -18,6 +18,8 @@ public class PruebaGsVideo extends PApplet{
 
 	public void movieEvent(GSMovie myMovie) {
 	  myMovie.read();
+	  System.out.println(myMovie.width+" . "+myMovie.height);
+
 	}
 
 

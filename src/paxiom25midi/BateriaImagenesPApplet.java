@@ -55,7 +55,7 @@ public class BateriaImagenesPApplet extends PApplet implements Paxiom{
 	boolean fotoVideo=true;
 	
 	public void draw() {
-		repintaTodo();
+		//repintaTodo();
 		if(fotoVideo){
 	frameRate(map(paxiom25midi.valorCircular(1), 0, 127, 1, 30));
 		
@@ -79,8 +79,7 @@ public class BateriaImagenesPApplet extends PApplet implements Paxiom{
 		  if (1 < myMovie.width && 1 < myMovie.height) {
 
 		myMovie.play();
-		fill(255,30);
-		if(myMovie!=null)
+		tint(255,10);
 		image(myMovie, 0, 0, width, height);
 		  }
 	}
