@@ -5,6 +5,7 @@ import java.util.List;
 
 import processing.core.PApplet;
 
+
 public class Axiom25 {
 
 	int[] idsCirculares = { 72, 8, 74, 71, 20, 22, 86, 73 };
